@@ -37,115 +37,51 @@ int main(int argc, char const *argv[])
 		{
 			printf("1. 1 Joueur\n2. 2 Joueurs\n3. R%sgles\n", CHARACTER1);
 		}
-
-		if (screen == 1 || screen == 2)
+		else if (screen == 1 || screen == 2)
 		{
-			// INITIALISATION DU JEU 1 JOUEUR
-
+			// INITIALISATION DU JEU, UN JOUEUR OU DEUX JOUEURS
 			char unknownColors[10] = {0};
-			int i = 0;
-
-			if (screen == 1)
+			switch (screen)
 			{
-				srand(time(NULL));
-				int drawnColor = 0;
-
-				for (i = 0; i < difficulty; ++i)
-				{
-					do
-					{
-						drawnColor = randomColors(65, 72);
-					} while (checkColorTab(drawnColor, unknownColors, difficulty, 0));
-					unknownColors[i] = drawnColor;
-				}
-				printf("Proposez %d couleurs de votre choix pour d%scouvrir la combinaison myst%sre:\n", difficulty, CHARACTER1, CHARACTER2);
-			}
-
-			// INITIALISATION DU JEU 2 JOUEURS
-
-			if (screen == 2)
-			{
-				printf("Joueur 1, proposez %d couleurs myst%sres à faire chercher %s Joueur 2:\n", difficulty, CHARACTER2, CHARACTER4);
-				do
-				{
-					unknownColors[difficulty] = 90;
-					scanf("%s", unknownColors);
-					upperCase(unknownColors, difficulty);
-				} while (unknownColors[difficulty] != '\0' || checkForbiddenColors(unknownColors, difficulty));
-
-				CLEAR()
-				Title();
-				printf("Joueur 2, proposez %d couleurs de votre choix pour d%scouvrir la combinaison de Joueur 1:\n", difficulty, CHARACTER1);
+				case 1:
+					onePlayerGameInitialization(difficulty, unknownColors);
+				break;
+				case 2:
+					twoPlayerGameInitialization(difficulty, unknownColors);
+				break;
 			}
 
 			// VERIFICATION DES COULEURS PROPOSEES PAR LE JOUEUR
-
-			int wellPlacedColors = 0, misplacedColors = 0, turns = 8;
 			char playerColors[10] = {0};
-
+			int wellPlacedColors = 0, misplacedColors = 0, turns = 8;
+			
 			do
 			{
-				do
-				{
-					playerColors[difficulty] = 1;
-					scanf("%s", playerColors);
-					upperCase(playerColors, difficulty);
-				} while (playerColors[difficulty] != '\0' || checkForbiddenColors(playerColors, difficulty));
-
 				char unknownColorsCopy[10] = {0};
 				strcpy(unknownColorsCopy, unknownColors);
-				wellPlacedColors = 0;
-				for (i = 0; i < difficulty; ++i)
-				{
-					if (unknownColorsCopy[i] == playerColors[i])
-					{
-						wellPlacedColors++;
-						unknownColorsCopy[i] = 90;
-					}
-				}
 
-				misplacedColors = 0;
-				for (i = 0; i < difficulty; ++i)
-				{
-					if (checkColorTab(playerColors[i], unknownColorsCopy, difficulty, 1) && unknownColorsCopy[i] != playerColors[i])
-					{
-						misplacedColors++;
-					}					
-				}
+				playerScanf(difficulty, playerColors);
+
+				wellPlacedColorsVerification(difficulty, &wellPlacedColors, unknownColorsCopy, playerColors);
+				misplacedColorsVerification(difficulty, &misplacedColors, unknownColorsCopy, playerColors);
 				//printf("%s   %s\n", unknownColorsCopy, unknownColors);
 				turns--;
 
 				if (turns != 0 && wellPlacedColors != difficulty)
 				{
-					char plural1 = plural(wellPlacedColors), plural2 = plural(misplacedColors), plural3 = plural(turns);
-					printf("Vous avez %d couleur%c bien plac%se%c. Vous avez %d couleur%c mal plac%se%c.\nIl vous reste %d coup%c.\n", wellPlacedColors, plural1, CHARACTER1, plural1, misplacedColors, plural2,CHARACTER1, plural2, turns, plural3);
+					turnIndication(wellPlacedColors, misplacedColors, turns);
 				}
 			} while (wellPlacedColors != difficulty && turns != 0);
 
-			if (screen == 1)
+			// MESSAGE DE FIN DE PARTIE
+			switch (screen)
 			{
-				if (wellPlacedColors == difficulty)
-				{
-					printf("\nBravo!! Vous avez gagn%s!\n\n", CHARACTER1);
-				}
-				else
-				{
-					printf("\nD%ssol%s, vous avez perdu...\n\n", CHARACTER1, CHARACTER1);
-					printf("La solution %stait: %s\n\n", CHARACTER1, unknownColors);
-				}
-			}
-
-			if (screen == 2)
-			{
-				if (wellPlacedColors == difficulty)
-				{
-					printf("\nBravo Joueur2!! Vous avez gagn%s, vous avez trouv%s la combinaison de Joueur1!\n\n", CHARACTER1, CHARACTER1);
-				}
-				else
-				{
-					printf("\nD%ssol%s Joueur2... Vous avez perdu\n\n", CHARACTER1, CHARACTER1);
-					printf("La combinaison de Joueur1 %stait: %s\nBravo Joueur1!\n\n", CHARACTER1, unknownColors);
-				}
+				case 1:
+					onePlayerEndMessage(wellPlacedColors, difficulty, unknownColors);
+				break;
+				case 2:
+					twoPlayerEndMessage(wellPlacedColors, difficulty, unknownColors);
+				break;
 			}
 			printf("Une autre partie?\n1. 1 joueur\n2. 2 joueurs\n0. Quitter\n\n");
 		}
@@ -224,9 +160,111 @@ void Title()
 	printf("      ##########################\n\n\n");
 }
 
-
 // afficher un plurial si la valeur est supérieur à 1
 char plural(int value)
 {
 	return (value > 1) ? 's' : 0;
+}
+
+// Tire aléatoire une combinaison de lettres
+void onePlayerGameInitialization(int difficulty, char *unknownColors)
+{
+	srand(time(NULL));
+	int drawnColor = 0;
+	int i;
+
+	for (i = 0; i < difficulty; ++i)
+	{
+		do
+		{
+			drawnColor = randomColors(65, 72);
+		} while (checkColorTab(drawnColor, unknownColors, difficulty, 0));
+		unknownColors[i] = drawnColor;
+	}
+	printf("Proposez %d couleurs de votre choix pour d%scouvrir la combinaison myst%sre:\n", difficulty, CHARACTER1, CHARACTER2);
+}
+
+// Demande au joueur 1 d'écrire une combinaison de lettres
+void twoPlayerGameInitialization(int difficulty, char *unknownColors)
+{
+	printf("Joueur 1, proposez %d couleurs myst%sres à faire chercher %s Joueur 2:\n", difficulty, CHARACTER2, CHARACTER4);
+	playerScanf(difficulty, unknownColors);
+	CLEAR()
+	Title();
+	printf("Joueur 2, proposez %d couleurs de votre choix pour d%scouvrir la combinaison de Joueur 1:\n", difficulty, CHARACTER1);
+}
+
+// Demande au joueur une combinaison et vérifie qu'elle soit autorisée
+void playerScanf(int difficulty, char *colors)
+{
+	do
+	{
+		colors[difficulty] = 90;
+		scanf("%s", colors);
+		upperCase(colors, difficulty);
+	} while (colors[difficulty] != '\0' || checkForbiddenColors(colors, difficulty));
+}
+
+// Vérifie si les lettres proposées par le joueur sont bien placées
+void wellPlacedColorsVerification(int difficulty, int *wellPlacedColors, char *unknownColorsCopy, char *playerColors)
+{
+	int i;
+	*wellPlacedColors = 0;
+	for (i = 0; i < difficulty; ++i)
+	{
+		if (unknownColorsCopy[i] == playerColors[i])
+		{
+			*wellPlacedColors +=  1;
+			unknownColorsCopy[i] = 90;
+		}
+	}
+}
+
+// Vérifie si les lettres proposées par le joueur sont présentes et mal placées
+void misplacedColorsVerification(int difficulty, int *misplacedColors, char *unknownColorsCopy, char *playerColors)
+{
+	int i;
+	*misplacedColors = 0;
+	for (i = 0; i < difficulty; ++i)
+	{
+		if (checkColorTab(playerColors[i], unknownColorsCopy, difficulty, 1) && unknownColorsCopy[i] != playerColors[i])
+		{
+			*misplacedColors += 1;
+		}					
+	}
+}
+
+// Phrase indicatrice écrite à chaque tour pour aider le joueur a trouvé la combinaison
+void turnIndication(int wellPlacedColors, int misplacedColors, int turns)
+{
+	char plural1 = plural(wellPlacedColors), plural2 = plural(misplacedColors), plural3 = plural(turns);
+	printf("Vous avez %d couleur%c bien plac%se%c. Vous avez %d couleur%c mal plac%se%c.\nIl vous reste %d coup%c.\n", wellPlacedColors, plural1, CHARACTER1, plural1, misplacedColors, plural2,CHARACTER1, plural2, turns, plural3);
+}
+
+// Message de fin de partie en mode 1 joueur
+void onePlayerEndMessage(int wellPlacedColors, int difficulty, char *unknownColors)
+{
+	if (wellPlacedColors == difficulty)
+	{
+		printf("\nBravo!! Vous avez gagn%s!\n\n", CHARACTER1);
+	}
+	else
+	{
+		printf("\nD%ssol%s, vous avez perdu...\n\n", CHARACTER1, CHARACTER1);
+		printf("La solution %stait: %s\n\n", CHARACTER1, unknownColors);
+	}
+}
+
+// Message de fin de partie en mode 2 joueur
+void twoPlayerEndMessage(int wellPlacedColors, int difficulty, char *unknownColors)
+{
+	if (wellPlacedColors == difficulty)
+	{
+		printf("\nBravo Joueur2!! Vous avez gagn%s, vous avez trouv%s la combinaison de Joueur1!\n\n", CHARACTER1, CHARACTER1);
+	}
+	else
+	{
+		printf("\nD%ssol%s Joueur2... Vous avez perdu\n\n", CHARACTER1, CHARACTER1);
+		printf("La combinaison de Joueur1 %stait: %s\nBravo Joueur1!\n\n", CHARACTER1, unknownColors);
+	}
 }
