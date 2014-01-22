@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include "mastermind.h"
 
 #ifdef LINUX
@@ -26,6 +27,7 @@ int main(int argc, char const *argv[])
 {
 	CLEAR()
 	int screen = 4;
+	int difficulty = 4;
 
 	do
 		{
@@ -40,8 +42,7 @@ int main(int argc, char const *argv[])
 		{
 			// INITIALISATION DU JEU 1 JOUEUR
 
-			char unknownColors[5] = {0};
-			unknownColors[5] = '\0';
+			char unknownColors[10] = {0};
 			int i = 0;
 
 			if (screen == 1)
@@ -49,77 +50,81 @@ int main(int argc, char const *argv[])
 				srand(time(NULL));
 				int drawnColor = 0;
 
-				for (i = 0; i < 4; ++i)
+				for (i = 0; i < difficulty; ++i)
 				{
 					do
 					{
 						drawnColor = randomColors(65, 72);
-					} while (checkColorTab(drawnColor, unknownColors, 4));
+					} while (checkColorTab(drawnColor, unknownColors, difficulty, 0));
 					unknownColors[i] = drawnColor;
 				}
-				printf("Proposez 4 couleurs de votre choix pour d%scouvrir la combinaison myst%sre:\n", CHARACTER1, CHARACTER2);
+				printf("Proposez %d couleurs de votre choix pour d%scouvrir la combinaison myst%sre:\n", difficulty, CHARACTER1, CHARACTER2);
 			}
 
 			// INITIALISATION DU JEU 2 JOUEURS
 
 			if (screen == 2)
 			{
-				printf("Joueur 1, proposez 4 couleurs myst%sres à faire chercher %s Joueur 2:\n", CHARACTER2, CHARACTER4);
+				printf("Joueur 1, proposez %d couleurs myst%sres à faire chercher %s Joueur 2:\n", difficulty, CHARACTER2, CHARACTER4);
 				do
 				{
-					unknownColors[4] = 1;
+					unknownColors[difficulty] = 90;
 					scanf("%s", unknownColors);
-					upperCase(unknownColors, 4);
-				} while (unknownColors[4] != '\0' || checkForbiddenColors(unknownColors, 4));
+					upperCase(unknownColors, difficulty);
+				} while (unknownColors[difficulty] != '\0' || checkForbiddenColors(unknownColors, difficulty));
 
 				CLEAR()
 				Title();
-				printf("Joueur 2, proposez 4 couleurs de votre choix pour d%scouvrir la combinaison de Joueur 1:\n", CHARACTER1);
+				printf("Joueur 2, proposez %d couleurs de votre choix pour d%scouvrir la combinaison de Joueur 1:\n", difficulty, CHARACTER1);
 			}
 
 			// VERIFICATION DES COULEURS PROPOSEES PAR LE JOUEUR
 
 			int wellPlacedColors = 0, misplacedColors = 0, turns = 8;
-			char playerColors[5] = {0};
+			char playerColors[10] = {0};
 
 			do
 			{
 				do
 				{
-					playerColors[4] = 1;
+					playerColors[difficulty] = 1;
 					scanf("%s", playerColors);
-					upperCase(playerColors, 4);
-				} while (playerColors[4] != '\0' || checkForbiddenColors(playerColors, 4));
+					upperCase(playerColors, difficulty);
+				} while (playerColors[difficulty] != '\0' || checkForbiddenColors(playerColors, difficulty));
 
+				char unknownColorsCopy[10] = {0};
+				strcpy(unknownColorsCopy, unknownColors);
 				wellPlacedColors = 0;
-				for (i = 0; i < 4; ++i)
+				for (i = 0; i < difficulty; ++i)
 				{
-					if (unknownColors[i] == playerColors[i])
+					if (unknownColorsCopy[i] == playerColors[i])
 					{
 						wellPlacedColors++;
+						unknownColorsCopy[i] = 90;
 					}
 				}
 
 				misplacedColors = 0;
-				for (i = 0; i < 4; ++i)
+				for (i = 0; i < difficulty; ++i)
 				{
-					if (checkColorTab(playerColors[i], unknownColors, 4) && unknownColors[i] != playerColors[i])
+					if (checkColorTab(playerColors[i], unknownColorsCopy, difficulty, 1) && unknownColorsCopy[i] != playerColors[i])
 					{
 						misplacedColors++;
-					}
+					}					
 				}
+				//printf("%s   %s\n", unknownColorsCopy, unknownColors);
 				turns--;
 
-				if (turns != 0 && wellPlacedColors != 4)
+				if (turns != 0 && wellPlacedColors != difficulty)
 				{
 					char plural1 = plural(wellPlacedColors), plural2 = plural(misplacedColors), plural3 = plural(turns);
 					printf("Vous avez %d couleur%c bien plac%se%c. Vous avez %d couleur%c mal plac%se%c.\nIl vous reste %d coup%c.\n", wellPlacedColors, plural1, CHARACTER1, plural1, misplacedColors, plural2,CHARACTER1, plural2, turns, plural3);
 				}
-			} while (wellPlacedColors != 4 && turns != 0);
+			} while (wellPlacedColors != difficulty && turns != 0);
 
 			if (screen == 1)
 			{
-				if (wellPlacedColors == 4)
+				if (wellPlacedColors == difficulty)
 				{
 					printf("\nBravo!! Vous avez gagn%s!\n\n", CHARACTER1);
 				}
@@ -132,7 +137,7 @@ int main(int argc, char const *argv[])
 
 			if (screen == 2)
 			{
-				if (wellPlacedColors == 4)
+				if (wellPlacedColors == difficulty)
 				{
 					printf("\nBravo Joueur2!! Vous avez gagn%s, vous avez trouv%s la combinaison de Joueur1!\n\n", CHARACTER1, CHARACTER1);
 				}
@@ -147,7 +152,7 @@ int main(int argc, char const *argv[])
 
 		if (screen == 3)
 		{
-			printf("D%scouvrez les quatres lettres myst%sres.\nLes lettres peuvent %stre les suivantes:\n     ABCDEFGH\nVous n'avez que 8 coups.\nFaites vos propositions sans espace entre les lettres, comme l'exemple suivant:\n     GECD\n\nA vous de jouez! Bonne chance!\n\n\n1. 1 joueur\n2. 2 joueurs\n", CHARACTER1, CHARACTER2, CHARACTER3);
+			printf("D%scouvrez les %d lettres myst%sres.\nLes lettres peuvent %stre les suivantes:\n     ABCDEFGH\nVous n'avez que 8 coups.\nFaites vos propositions sans espace entre les lettres, comme l'exemple suivant:\n     GECD\n\nA vous de jouez! Bonne chance!\n\n\n1. 1 joueur\n2. 2 joueurs\n", CHARACTER1, difficulty, CHARACTER2, CHARACTER3);
 		}
 
 		scanf("%d", &screen);
@@ -163,14 +168,21 @@ int randomColors(int MIN, int MAX)
 	return rand() % (MAX -MIN + 1) + MIN;
 }
 
-//vérifier si la lettre est bien compris dans le tableau
-int checkColorTab(int comparedColor, char *colors, int size)
+//Si CheckOnce est faux: vérifier si la lettre est bien compris dans le tableau, si checkOne est vrai: vérifier si la lettre est bien compris dans le tableau qu'une fois
+int checkColorTab(int comparedColor, char *colors, int size, int checkOnce)
 {
 	int i = 0;
 	for (i = 0; i < size; i++)
 	{
+		//printf("%s\n", colors);
 		if (colors[i] == comparedColor)
-		return 1;
+		{
+			if (checkOnce)
+			{
+				colors[i] = 90;
+			}
+			return 1;
+		}
 	}
 	return 0;
 }
@@ -212,6 +224,8 @@ void Title()
 	printf("      ##########################\n\n\n");
 }
 
+
+// afficher un plurial si la valeur est supérieur à 1
 char plural(int value)
 {
 	return (value > 1) ? 's' : 0;

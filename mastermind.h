@@ -1,5 +1,5 @@
 int randomColors(int MIN, int MAX);
-int checkColorTab(int comparedColor, char *colors, int size);
+int checkColorTab(int comparedColor, char *colors, int size, int checkOnce);
 int checkForbiddenColors(char *colors, int size);
 void upperCase(char *colors, int size);
 void Title();
