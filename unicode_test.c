@@ -4,7 +4,9 @@
 
 void borderMaker(char *border, char *leftCorner, char *rightCorner, char *line, int difficulty);
 void boardPrinter(int difficulty);
-void upSquareMaker(char *border, char *doubleVertical, char *simpleUpRightCorner, char *simpleHorizontal, char *simpleUpLeftCorner, char *space);
+void upDownBorderSquareMaker(char *border, char *doubleVertical, char *simpleLeftCorner, char *simpleHorizontal, char *simpleRightCorner, char *space);
+void sideSquareMaker(char *border,char *doubleVertical,char *simpleVertical,char *space, char *underscore);
+
  
 int main()
 {
@@ -16,22 +18,15 @@ int main()
 }
 
 
-void borderMaker(char *border, char *leftCorner, char *rightCorner, char *line, int lineNumber)
-{
-    strcat(border, leftCorner);
-
-    for (int i = 0; i < lineNumber; ++i)
-    {
-        strcat(border, line);
-    }
-    
-    strcat(border, rightCorner);
-}
 
 
 void boardPrinter(int difficulty)
 {
+    int i;
     setlocale(LC_ALL, "");
+
+    char underscore[] = "_";
+
     char doubleHorizontal[] = "\u2550";
     char doubleVertical[] = "\u2551";
     char doubleDownRightCorner[] = "\u2554";
@@ -51,42 +46,90 @@ void boardPrinter(int difficulty)
     char upBorder[1000] = {0};
     char downBorder[1000] = {0};
 
-    char upSquareBorder[1000] = {0};
-    char downSquareBorder[1000] = {0};
-    char sideSquareBorder[1000] = {0};
+    char upSquareBorder[8][1000] = {0};
+    char downSquareBorder[8][1000] = {0};
+    char sideSquareBorder[8][1000] = {0};
     char emplyLine[1000] = {0};
 
-    borderMaker(upBorder, doubleDownRightCorner, doubleDownLeftCorner, doubleHorizontal, (10*difficulty));
-    upSquareMaker(upSquareBorder, doubleVertical, simpleDownRightCorner, simpleHorizontal, simpleDownLeftCorner, space);
-    borderMaker(downBorder, doubleUpRightCorner, doubleUpLeftCorner, doubleHorizontal, (10*difficulty));
+    borderMaker(upBorder, doubleDownRightCorner, doubleDownLeftCorner, doubleHorizontal, (8*difficulty+2));
+    for (i = 0; i < 8; ++i)
+    {
+        upDownBorderSquareMaker(upSquareBorder[i], doubleVertical, simpleDownRightCorner, simpleHorizontal, simpleDownLeftCorner, space);
+        sideSquareMaker(sideSquareBorder[i], doubleVertical, simpleVertical, space, underscore);
+        upDownBorderSquareMaker(downSquareBorder[i], doubleVertical, simpleUpRightCorner, simpleHorizontal, simpleUpLeftCorner, space);
+    }
+    borderMaker(downBorder, doubleUpRightCorner, doubleUpLeftCorner, doubleHorizontal, (8*difficulty+2));
+
 
     wprintf(L"%s\n", upBorder);
-    wprintf(L"%s\n", upSquareBorder);
+    for (i = 0; i < 8; ++i)
+    {
+        wprintf(L"%s\n", upSquareBorder[i]);
+        wprintf(L"%s\n", sideSquareBorder[i]);
+        wprintf(L"%s\n", downSquareBorder[i]);
+    }
     wprintf(L"%s\n", downBorder);
 
 }
 
-void upSquareMaker(char *border, char *doubleVertical, char *simpleDownRightCorner, char *simpleHorizontal, char *simpleDownLeftCorner, char *space)
+void borderMaker(char *border, char *leftCorner, char *rightCorner, char *line, int lineNumber)
+{
+    strcat(border, leftCorner);
+
+    for (int i = 0; i < lineNumber; ++i)
+    {
+        strcat(border, line);
+    }
+    strcat(border, rightCorner);
+}
+
+
+void upDownBorderSquareMaker(char *border, char *doubleVertical, char *simpleLeftCorner, char *simpleHorizontal, char *simpleRightCorner, char *space)
 {
     int i, j;
     strcat(border, doubleVertical);
     strcat(border, space);
     for (int i = 0; i < 4; ++i)
     {
-        strcat(border, simpleDownRightCorner);
-        for (j = 0; j < 3; ++j)
-        {
-            strcat(border, simpleHorizontal);
-        }
-        strcat(border, simpleDownLeftCorner);
+        borderMaker(border, simpleLeftCorner, simpleRightCorner, simpleHorizontal, 3);
+        strcat(border, space);
+    }
 
+    for (int i = 0; i < 9; ++i)
+    {
         strcat(border, space);
     }
 
     strcat(border, doubleVertical);
-
-
 }
+
+
+void sideSquareMaker(char *border,char *doubleVertical,char *simpleVertical,char *space, char *underscore)
+{
+    int i, j;
+    strcat(border, doubleVertical);
+    strcat(border, space);
+    for (i = 0; i < 4; ++i)
+    {
+        strcat(border, simpleVertical);
+        for (j = 0; j < 3; ++j)
+            {
+                strcat(border, space);
+            }
+        strcat(border, simpleVertical);
+        strcat(border, space);
+    }
+    for (int i = 0; i < 4; ++i)
+    {
+        strcat(border, space);
+        strcat(border, underscore);
+
+    }
+    strcat(border, space);
+    strcat(border, doubleVertical);
+}
+
+
 
 //gcc -std=c99 unicode_test -o test
 //https://en.wikipedia.org/wiki/Box-drawing_character#Unicode
