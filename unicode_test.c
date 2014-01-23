@@ -69,14 +69,13 @@ void boardPrinter(int difficulty)
         wprintf(L"%s\n", downSquareBorder[i]);
     }
     wprintf(L"%s\n", downBorder);
-
 }
 
 void borderMaker(char *border, char *leftCorner, char *rightCorner, char *line, int lineNumber)
 {
+    int i;
     strcat(border, leftCorner);
-
-    for (int i = 0; i < lineNumber; ++i)
+    for (i = 0; i < lineNumber; ++i)
     {
         strcat(border, line);
     }
@@ -99,7 +98,6 @@ void upDownBorderSquareMaker(char *border, char *doubleVertical, char *simpleLef
     {
         strcat(border, space);
     }
-
     strcat(border, doubleVertical);
 }
 
