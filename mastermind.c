@@ -26,7 +26,7 @@
 int main(int argc, char const *argv[])
 {
 	CLEAR()
-	int screen = 4;
+	char screen = 4;
 	int difficulty = 4;
 
 	do
@@ -91,7 +91,13 @@ int main(int argc, char const *argv[])
 			printf("D%scouvrez les %d lettres myst%sres.\nLes lettres peuvent %stre les suivantes:\n     ABCDEFGH\nVous n'avez que 8 coups.\nFaites vos propositions sans espace entre les lettres, comme l'exemple suivant:\n     GECD\n\nA vous de jouez! Bonne chance!\n\n\n1. 1 joueur\n2. 2 joueurs\n", CHARACTER1, difficulty, CHARACTER2, CHARACTER3);
 		}
 
-		scanf("%d", &screen);
+		do
+		{
+			screen = 0;
+			scanf("%s", &screen);
+			printf("%d\n", screen);
+		} while (screen != 1 && screen != 2 && screen != 3 && screen != 4 );
+		
 		CLEAR()
 	} while (screen);
 
@@ -202,6 +208,10 @@ void playerScanf(int difficulty, char *colors)
 		colors[difficulty] = 90;
 		scanf("%s", colors);
 		upperCase(colors, difficulty);
+		if (colors[difficulty] != '\0' || checkForbiddenColors(colors, difficulty))
+		{
+			printf("Je n'ai pas compris, proposez une autre combinaison:\n");
+		}
 	} while (colors[difficulty] != '\0' || checkForbiddenColors(colors, difficulty));
 }
 
